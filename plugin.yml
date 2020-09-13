@@ -1,0 +1,35 @@
+name: Convox Run
+description: Run a command in a Convox App
+author: https://github.com/liamdawson
+requirements:
+  - convox
+configuration:
+  required:
+    - rack
+    - app
+    - service
+    - command
+  additionalProperties: false
+  properties:
+    rack:
+      type: string
+    app:
+      type: string
+    command:
+      type: string
+    service:
+      type: string
+    release:
+      oneOf:
+        - type: string
+        - type: object
+          additionalProperties: false
+          properties:
+            metadata-key:
+              type: string
+    detach:
+      type: boolean
+      default: false
+    timeout:
+      type: number
+      default: 7200 # 1 hour

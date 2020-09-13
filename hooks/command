@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+convox_rack="$BUILDKITE_PLUGIN_CONVOX_RUN_RACK"
+convox_app="$BUILDKITE_PLUGIN_CONVOX_RUN_APP"
+convox_service="$BUILDKITE_PLUGIN_CONVOX_RUN_SERVICE"
+
+convox_run_cmd=( convox run --rack="$convox_rack" --app="$convox_app" )
+
+if [ "${BUILDKITE_PLUGIN_CONVOX_RUN_RELEASE_METADATA_KEY:-}" != "" ]; then
+  convox_run_cmd+=( --release="$(buildkite-agent meta-data get "$BUILDKITE_PLUGIN_CONVOX_RUN_RELEASE_METADATA_KEY")" )
+elif [ "${BUILDKITE_PLUGIN_CONVOX_RUN_RELEASE:-}" != "" ]; then
+  convox_run_cmd+=( --release="$BUILDKITE_PLUGIN_CONVOX_RUN_RELEASE" )
+fi
+
+! "${BUILDKITE_PLUGIN_CONVOX_RUN_DETACH:-false}"    || convox_run_cmd+=( --detach )
+[ "${BUILDKITE_PLUGIN_CONVOX_RUN_TIMEOUT:-}" = "" ] || convox_run_cmd+=( --timeout="$BUILDKITE_PLUGIN_CONVOX_RUN_TIMEOUT" )
+
+convox_run_cmd+=( "$convox_service" "$BUILDKITE_PLUGIN_CONVOX_RUN_COMMAND" )
+
+echo "--- Running command in Convox"
+
+printf "$ " && printf '%q ' "${convox_run_cmd[@]}" && echo
+"${convox_run_cmd[@]}"
